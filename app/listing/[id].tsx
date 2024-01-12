@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native';
 import React from 'react';
-import { Link } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 
 const Page = () => {
+  const { id } = useLocalSearchParams<{ id: string }>();
+  console.log(id);  
   return (
     <View>
-      <Link href={'/(modals)/login'}>Login</Link>
-      <Link href={'/(modals)/booking'}>Booking</Link>
-      <Link href={'/listing/1234'}>Listing Details</Link>
+      <Text>Page</Text>
     </View>
   );
 };
