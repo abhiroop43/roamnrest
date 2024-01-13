@@ -1,10 +1,28 @@
 import { Ionicons } from '@expo/vector-icons';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { SplashScreen, Stack, useRouter } from 'expo-router';
 import { useEffect } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
+import * as SecureStore from 'expo-secure-store';
+import {ClerkProvider, useAuth} from "@clerk/clerk-expo";
+import {SafeAreaView} from "react-native";
+
+const CLERK_PUBLISHABLE_KEY= process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY;
+
+const tokenCache = {
+    async getToken(key: string) {
+        try {
+            return SecureStore.getItemAsync(key);
+        } catch  {
+        }
+    },
+    async saveToken(key: string, token: string) {
+        try {
+            return SecureStore.setItemAsync(key, token);
+        } catch  {
+        }
+    },
+}
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -41,15 +59,26 @@ export default function RootLayout() {
     return null;
   }
 
-  return <RootLayoutNav />;
+  return (
+      <ClerkProvider publishableKey={CLERK_PUBLISHABLE_KEY!} tokenCache={tokenCache}>
+          {/*<SafeAreaView>*/}
+              <RootLayoutNav />
+          {/*</SafeAreaView>*/}
+      </ClerkProvider>
+  );
 }
 
 function RootLayoutNav() {
-  // const colorScheme = useColorScheme();
   const router = useRouter();
+  const {isLoaded, isSignedIn} = useAuth();
+
+    useEffect(() => {
+        if(isLoaded && !isSignedIn) {
+            router.push('/(modals)/login');
+        }
+    }, [isLoaded]);
 
   return (
-    // <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
